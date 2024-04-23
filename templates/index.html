@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict Next Day Price</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333; /* Adjusted label color */
+        }
+        select, input[type="number"], input[type="submit"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        #prediction-result {
+            display: none;
+            margin-top: 20px;
+            background-color: #28a745;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Predict Next Day Price</h1>
+        <form id="prediction-form" action="/predict" method="post">
+            <label for="market_name">Market Name:</label>
+            <input type="text" id="market_name" name="market_name" required>
+
+            <label for="grain">Grain:</label>
+            <select id="grain" name="grain" onchange="updateVarietyOptions()" required>
+                <option value="Soyabean">Soyabean</option>
+                <option value="Wheat">Wheat</option>
+            </select>
+
+            <label for="variety">Variety:</label>
+            <select id="variety" name="variety" required>
+                <!-- Default options for Soyabean -->
+                <option value="Yellow">Yellow</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="min_price">Min Price (Rs./Quintal):</label>
+            <input type="text" id="min_price" name="min_price" required>
+
+            <label for="max_price">Max Price (Rs./Quintal):</label>
+            <input type="text" id="max_price" name="max_price" required>
+
+            <input type="submit" value="Predict">
+        </form>
+
+        <div id="prediction-result"></div>
+    </div>
+
+    <script>
+        function updateVarietyOptions() {
+            var grain = document.getElementById("grain").value;
+            var varietySelect = document.getElementById("variety");
+            varietySelect.innerHTML = "";
+
+            if (grain === "Soyabean") {
+                var yellowOption = document.createElement("option");
+                yellowOption.text = "Yellow";
+                varietySelect.add(yellowOption);
+
+                var otherOption = document.createElement("option");
+                otherOption.text = "Other";
+                varietySelect.add(otherOption);
+            } else if (grain === "Wheat") {
+                var sharbatiOption = document.createElement("option");
+                sharbatiOption.text = "Sharbati";
+                varietySelect.add(sharbatiOption);
+
+                var maharashtraOption = document.createElement("option");
+                maharashtraOption.text = "Maharashtra 2189";
+                varietySelect.add(maharashtraOption);
+
+                var otherOption = document.createElement("option");
+                otherOption.text = "Other";
+                varietySelect.add(otherOption);
+            }
+        }
+
+        document.getElementById('prediction-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Collect form data
+            const formData = new FormData(this);
+
+            // Send form data to server
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update DOM with prediction result
+                const predictionResult = document.getElementById('prediction-result');
+                predictionResult.style.display = "block";
+                predictionResult.innerHTML = `Next day price prediction: ${data.prediction}`;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
