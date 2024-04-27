@@ -9,6 +9,20 @@ app = Flask(__name__)
 # Load the trained model
 model = joblib.load('next_day_price_model.pkl')
 
+# Define the columns to be encoded
+categorical_cols = ['Market Name', 'Grain', 'Variety']
+
+# Initialize the OneHotEncoder with handle_unknown='ignore'
+encoder = OneHotEncoder(handle_unknown='ignore')
+
+# Define the column transformer with the encoder
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', encoder, categorical_cols),
+    ],
+    remainder='passthrough'
+)
+
 # Load the fitted preprocessor
 preprocessor = joblib.load('preprocessor.pkl')
 
@@ -43,4 +57,3 @@ def predict():
 
 # if __name__ == '__main__':
 #     app.run(debug=True)
-
